@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapleStoryPerfectNode</title>
+    <style>
+        .skill-chunk {
+            border: 2px solid black;
+            margin: 5px;
+            padding: 2px;
+        }
+        div#skill-chunk-list {
+            display: inline-flex;
+            flex-wrap: wrap;
+        }
+        .skill-result {
+            border: 1px solid red;
+            margin: 0px 4px;
+        }
+        div#id-div-result-skill-chunk-list {
+            display: inline-flex;
+        }
+    </style>
+</head>
+<body>
+    <div id="id-div-skill-list">
+        <div id="id-div-skill-list-kanna">
+        <img class="img-cls-skill" src="img/kanna/Skill_Veritable_Pandemonium.webp" id="kanna_0">
+        <img class="img-cls-skill" src="img/kanna/Skill_Yosuzume.webp" id="kanna_1">
+        <img class="img-cls-skill" src="img/kanna/Skill_Nine-Tailed_Fury.webp" id="kanna_2">
+        <img class="img-cls-skill" src="img/kanna/Skill_Shikigami_Haunting_4.webp" id="kanna_3">
+        <img class="img-cls-skill" src="img/kanna/Skill_Ghost_Yaksha_Boss.webp" id="kanna_4">
+        <img class="img-cls-skill" src="img/kanna/Skill_Vanquishers_Charm.webp" id="kanna_5">
+        <img class="img-cls-skill" src="img/kanna/Skill_Shikigami_Charm.webp" id="kanna_6">
+        <img class="img-cls-skill" src="img/kanna/Skill_Orochi.webp" id="kanna_7">
+        <img class="img-cls-skill" src="img/kanna/Skill_Falling_Sakura.webp" id="kanna_8">
+        <img class="img-cls-skill" src="img/kanna/Skill_Nightghost_Guide.webp" id="kanna_9">
+        <img class="img-cls-skill" src="img/kanna/Skill_Binding_Tempest.webp" id="kanna_10">
+        <img class="img-cls-skill" src="img/kanna/Skill_Kishin_Shoukan.webp" id="kanna_11">
+        <img class="img-cls-skill" src="img/kanna/Skill_Nimbus_Curse.webp" id="kanna_12">
+        <img class="img-cls-skill" src="img/kanna/Skill_Shikigami_Doppelganger.webp" id="kanna_13">
+        <img class="img-cls-skill" src="img/kanna/Skill_Tengu_Strike.webp" id="kanna_14">
+    </div>   
+    </div>
+    <div id="skill-chunk-list">
+    </div>
+    <div id="id-div-action">
+        <select id="id-select-mode">
+            <option value="4n6s">4核6技(4 node 6 skill)</option>
+            <option value="6n9s">6核9技(6 node 9 skill)</option>
+        </select>
+        <button id="id-btn-calculate">计算(calculate)</button>
+    </div>
+    <div id="id-div-result-skill-chunk-list">
+    </div>
+</body>
+<script>
+const log = console.log.bind(this)
+const e = (sel) =>  document.querySelector(sel)
+
+const bindEvent = (dom, eventType, callback, useCapture=false) => {
+    e(dom).addEventListener(eventType, callback, useCapture)
+}
+
+const bindEventDelegate = (rootDom, targetSelector, eventType, callback, useCapture=false) => {
+    bindEvent(rootDom, eventType, (event) => {
+        if (event.target.matches(targetSelector)) {
+            callback(event)
+        }
+    }, useCapture)
+}
+
+const onImgClick = function(event) {
+    const divBox = e('#skill-chunk-list')
+    const target = event.target
+    const lastChunk = divBox.lastElementChild
+    const src = target.getAttribute('src')
+    if (lastChunk == null) {
+        divBox.insertAdjacentHTML('beforeend', `<div class="skill-chunk"><img class="img-cls-selected-skill" src="${src}"></div>`)
+    } else {
+        const cc = lastChunk.children
+        if (cc.length >= 3) {
+            divBox.insertAdjacentHTML('beforeend', `<div class="skill-chunk"><img class="img-cls-selected-skill" src="${src}"></div>`)
+        } else {
+            lastChunk.insertAdjacentHTML('beforeend', `<img class="img-cls-selected-skill" src="${src}">`)
+        }
+    }
+}
+
+function k_combinations(set, k) {
+	var i, j, combs, head, tailcombs;
+	// There is no way to take e.g. sets of 5 elements from
+	// a set of 4.
+	if (k > set.length || k <= 0) {
+		return [];
+	}
+	// K-sized set has only one K-sized subset.
+	if (k == set.length) {
+		return [set];
+	}
+	
+	// There is N 1-sized subsets in a N-sized set.
+	if (k == 1) {
+		combs = [];
+		for (i = 0; i < set.length; i++) {
+			combs.push([set[i]]);
+		}
+		return combs;
+	}
+	combs = [];
+	for (i = 0; i < set.length - k + 1; i++) {
+		// head is a list that includes only our current element.
+		head = set.slice(i, i + 1);
+		// We take smaller combinations from the subsequent elements
+		tailcombs = k_combinations(set.slice(i + 1), k - 1);
+		// For each (k-1)-combination we join it with the current
+		// and store it to the set of k-combinations.
+		for (j = 0; j < tailcombs.length; j++) {
+			combs.push(head.concat(tailcombs[j]));
+		}
+	}
+	return combs;
+}
+
+const checkPerfect = function(nodeList) {
+    const d = {}
+    const g = nodeList
+    for (var j = 0; j < g.length; j++) {
+        const s3 = g[j]
+        for (var k = 0; k < s3.length; k++) {
+            const s = s3[k]
+            if (d[s]) {
+                d[s] += 1
+            } else {
+                d[s] = 1
+            }
+        }
+    }
+    for (var key in d) {
+        var v = d[key]
+        log(key, v)
+        if (v != 2) {
+            return false 
+        }
+    }
+    return true
+}
+
+const filterNode = function(combinationList) {
+    const r = []
+    for (var i = 0; i < combinationList.length; i++) {
+        const g = combinationList[i]
+        const headers = g.map((x) => x[0])
+        const uh = uniqueArr(headers)
+        if (headers.length != uh.length) {
+            continue
+        }
+        if (checkPerfect(g)) {
+            r.push(g)
+        }
+    }
+    return r
+}
+
+function uniqueArr(arr){
+    //Set数据结构，它类似于数组，其成员的值都是唯一的
+    return Array.from(new Set(arr)); // 利用Array.from将Set结构转换成数组
+}
+
+function renderResult(nodeListCom) {
+    const divBox = e('#id-div-result-skill-chunk-list')
+    let tmp = ``
+    for (var i = 0; i < nodeListCom.length; i++) {
+        const nodeList = nodeListCom[i]
+        let nodeListStr = ``
+        for (var j = 0; j < nodeList.length; j++) {
+            const node = nodeList[j]
+            nodeListStr += `
+                <div class="skill-chunk">
+                    <img class="img-cls-selected-skill" src="${node[0]}">
+                    <img class="img-cls-selected-skill" src="${node[1]}">
+                    <img class="img-cls-selected-skill" src="${node[2]}">
+                </div>
+            `
+        }
+        tmp += `<div class="skill-result">${nodeListStr}</div>`
+    }
+    divBox.innerHTML = tmp
+}
+
+const onBtnClick = function(event) {
+    const chunkList = e('#skill-chunk-list').children
+    const mode = e('#id-select-mode').value
+    const chunkImages = []
+    for (var i = 0; i < chunkList.length; i++) {
+        const chunk = chunkList[i]
+        const imgTagList = chunk.children
+        const imgs = Array.from(imgTagList).map((t) => t.getAttribute('src'))
+        if (imgs.length == 3) {
+            chunkImages.push(imgs)
+        }
+    }
+    let modeNum = 4
+    if (mode == '6n9s') {
+        modeNum = 6
+    }
+    const r = k_combinations(chunkImages, modeNum)
+    const nodeListCom = filterNode(r)
+    log(nodeListCom)
+    renderResult(nodeListCom)
+}
+
+bindEventDelegate('#id-div-skill-list', '.img-cls-skill', 'click', onImgClick)
+bindEventDelegate('#id-div-action', '#id-btn-calculate', 'click', onBtnClick)
+
+</script>
+</html>
